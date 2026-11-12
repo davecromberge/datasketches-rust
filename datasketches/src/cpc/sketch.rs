@@ -197,8 +197,11 @@ impl CpcSketch {
     pub fn update<T: Hash>(&mut self, value: T) {
         let mut hasher = MurmurHash3X64128::with_seed(self.seed);
         value.hash(&mut hasher);
-        let (h1, h2) = hasher.finish128();
+        self.update_hashed(hasher.finish128());
+    }
 
+    /// Updates the sketch with a hash from [`crate::hash::hash128`], computed with this sketch's seed.
+    pub fn update_hashed(&mut self, (h1, h2): (u64, u64)) {
         let k = 1 << self.lg_k;
         let col = h2.leading_zeros(); // 0 <= col <= 64
         let col = if col > 63 { 63 } else { col as u8 }; // clip so that 0 <= col <= 63

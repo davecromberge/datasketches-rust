@@ -282,6 +282,12 @@ impl ThetaSketch {
         self.table.try_insert(value);
     }
 
+    /// Updates the sketch with a hash from [`crate::hash::hash128`], computed with this sketch's seed.
+    pub fn update_hashed(&mut self, hash: (u64, u64)) {
+        self.is_empty = false;
+        self.table.try_insert_hash(hash.0 >> 1);
+    }
+
     /// Returns the cardinality estimate.
     ///
     /// # Examples

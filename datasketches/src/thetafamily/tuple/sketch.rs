@@ -358,6 +358,26 @@ where
         });
     }
 
+    /// Updates the sketch with a key hash from [`crate::hash::hash128`], computed with this sketch's seed.
+    pub fn update_hashed<U>(&mut self, hash: (u64, u64), value: U)
+    where
+        P: SummaryUpdatePolicy<U>,
+    {
+        self.is_empty = false;
+        let policy = &self.policy;
+        self.table.try_insert_hash(hash.0 >> 1, |existing| match existing {
+            Some(summary) => {
+                policy.update(summary, value);
+                None
+            }
+            None => {
+                let mut summary = policy.create();
+                policy.update(&mut summary, value);
+                Some(summary)
+            }
+        });
+    }
+
     /// Returns the cardinality (distinct key count) estimate.
     pub fn estimate(&self) -> f64 {
         if self.is_empty() {

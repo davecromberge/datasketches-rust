@@ -19,6 +19,14 @@
 
 pub mod value;
 
+/// Hashes a value exactly as sketch updates do, so one hash can feed several sketches through `update_hashed`.
+#[cfg(any(feature = "cpc", feature = "theta", feature = "tuple"))]
+pub fn hash128<T: std::hash::Hash>(value: T, seed: u64) -> (u64, u64) {
+    let mut hasher = murmurhash::MurmurHash3X64128::with_seed(seed);
+    value.hash(&mut hasher);
+    hasher.finish128()
+}
+
 #[cfg(any(
     feature = "countmin",
     feature = "cpc",
